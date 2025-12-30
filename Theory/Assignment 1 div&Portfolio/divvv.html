@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Div</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f8bfbf; 
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    .header, .footer {
+      background-color: #98d4cc; /* light teal */
+      padding: 20px;
+      margin: 10px;
+    }
+
+    .main {
+      display: flex;
+      margin: 10px;
+    }
+
+    .aside {
+      background-color: #4da6a6;
+      flex: 1;
+      padding: 20px;
+      margin-right: 10px;
+    }
+
+    .article {
+      background-color: #f57d7d;
+      flex: 3;
+      padding: 20px;
+    }
+
+    .images {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 10px;
+    }
+
+    .image {
+      background-color: #d3d3d3;
+      width: 100px;
+      height: 100px;
+      line-height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Header</div>
+
+  <div class="main">
+    <div class="aside">Aside</div>
+
+    <div class="article">
+      Article
+      <div class="images">
+        <div class="image">Image</div>
+        <div class="image">Image</div>
+        <div class="image">Image</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Footer</div>
+</body>
+</html>

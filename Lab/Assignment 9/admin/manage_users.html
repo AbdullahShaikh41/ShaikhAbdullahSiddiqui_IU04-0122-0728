@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MediStore - Manage Users</title>
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Placeholder for master template -->
+  <div id="masterMount"></div>
+
+  <script>
+    async function mountMasterAndContent() {
+      // Load master template
+      const res = await fetch('./master_template.html');
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      document.head.innerHTML = doc.head.innerHTML
+      document.getElementById('masterMount').innerHTML = doc.getElementById('masterMount').innerHTML;
+
+      // Inject modal
+      document.body.insertAdjacentHTML('beforeend', `
+        <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header bg-light">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <table class="table table-bordered">
+                  <tr><th>Name</th><td><input type="text" id="editName" class="form-control"></td></tr>
+                  <tr><th>Email</th><td><input type="email" id="editEmail" class="form-control"></td></tr>
+                  <tr><th>Contact</th><td><input type="text" id="editContact" class="form-control"></td></tr>
+                  <tr><th>Address</th><td><input type="text" id="editAddress" class="form-control"></td></tr>
+                </table>
+                <input type="hidden" id="editUserId">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+
+      // Page title
+      document.getElementById('sectionTitle').innerText = 'Manage Users';
+
+      const container = document.getElementById('pageContent');
+      container.innerHTML = '<p class="lead">Loading users...</p>';
+
+      try {
+        const resUsers = await fetch('../../Backend/admin/get_all_users.php');
+        const data = await resUsers.json();
+
+        if (!data.success || !data.users.length) {
+          container.innerHTML = '<div class="alert alert-warning">No users found.</div>';
+          return;
+        }
+
+        container.innerHTML = '';
+        data.users.forEach(user => {
+          let ordersHTML = '';
+          if (user.orders && user.orders.length) {
+            ordersHTML = `
+              <table class="table table-sm table-striped mt-2">
+                <thead class="table-light">
+                  <tr><th>Order ID</th><th>Total</th><th>Status</th><th>Date</th></tr>
+                </thead><tbody>
+            `;
+            user.orders.forEach(order => {
+              ordersHTML += `
+                <tr>
+                  <td>${order.id}</td>
+                  <td>Rs ${order.total}</td>
+                  <td><span class="badge bg-info">${order.status}</span></td>
+                  <td>${order.created_at}</td>
+                </tr>
+              `;
+            });
+            ordersHTML += `</tbody></table>`;
+          } else {
+            ordersHTML = '<p class="text-muted">No orders placed.</p>';
+          }
+
+          container.innerHTML += `
+            <div class="custom-card mb-4 p-3 shadow-sm">
+              <h5 class="fw-bold text-primary">${user.name}</h5>
+              <p>Email: ${user.email}</p>
+              <p>Contact: ${user.contact || 'N/A'}</p>
+              <p>Address: ${user.address || 'N/A'}</p>
+              <button class="btn btn-sm btn-outline-secondary me-2"
+                onclick="openEditModal(${user.id}, '${user.name}', '${user.email}', '${user.contact}', '${user.address}')">
+                <i class="fas fa-edit me-1"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-outline-secondary"
+                onclick="deleteUser(${user.id})">
+                <i class="fas fa-trash me-1"></i> Delete
+              </button>
+              <h6 class="mt-3">Orders:</h6>
+              ${ordersHTML}
+            </div>
+          `;
+        });
+      } catch (err) {
+        container.innerHTML = '<div class="alert alert-danger">❌ Failed to load users.</div>';
+        console.error(err);
+      }
+    }
+
+    function openEditModal(id, name, email, contact, address) {
+      document.getElementById('editUserId').value = id;
+      document.getElementById('editName').value = name;
+      document.getElementById('editEmail').value = email;
+      document.getElementById('editContact').value = contact;
+      document.getElementById('editAddress').value = address;
+
+      var modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+      modal.show();
+    }
+
+    async function saveUserChanges() {
+      const id = document.getElementById('editUserId').value;
+      const name = document.getElementById('editName').value;
+      const email = document.getElementById('editEmail').value;
+      const contact = document.getElementById('editContact').value;
+      const address = document.getElementById('editAddress').value;
+
+      const formData = new FormData();
+      formData.append("id", id);
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("contact", contact);
+      formData.append("address", address);
+
+      const res = await fetch('../../Backend/admin/update_user.php', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      alert(data.message);
+
+      bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+      mountMasterAndContent();
+    }
+
+    async function deleteUser(id) {
+      if (!confirm("Are you sure you want to delete this user?")) return;
+
+      const formData = new FormData();
+      formData.append("id", id);
+
+      const res = await fetch('../../Backend/admin/delete_user.php', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      alert(data.message);
+      mountMasterAndContent();
+    }
+
+    mountMasterAndContent();
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

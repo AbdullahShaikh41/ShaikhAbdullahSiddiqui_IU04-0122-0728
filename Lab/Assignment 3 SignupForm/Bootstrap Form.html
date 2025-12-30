@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Form</title>
+  
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5">
+    <div class="card mx-auto shadow p-4" style="max-width: 500px;">
+      <h3 class="text-center mb-4">Registration Form</h3>
+
+      <form>
+        <div class="mb-3">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-control" placeholder="Shaikh">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-control" placeholder="Abdullah">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" placeholder="imabdullah@gmail.com">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" placeholder="Abc123@">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">DOB</label>
+          <input type="date" class="form-control">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Gender</label><br>
+          <input type="radio" name="gender" value="male"> Male
+          <input type="radio" name="gender" value="female"> Female
+          <input type="radio" name="gender" value="other"> Other
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Interested Courses</label><br>
+          <input type="checkbox" name="course" value="python"> Python<br>
+          <input type="checkbox" name="course" value="html"> HTML<br>
+          <input type="checkbox" name="course" value="css"> CSS<br>
+          <input type="checkbox" name="course" value="javascript"> JavaScript<br>
+          <input type="checkbox" name="course" value="java"> Java
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Country</label>
+          <select class="form-select" id="country" onchange="updateCities()">
+            <option value="">Select Country</option>
+            <option value="pakistan">Pakistan</option>
+            <option value="india">India</option>
+            <option value="usa">USA</option>
+            <option value="uk">UK</option>
+            <option value="canada">Canada</option>
+            <option value="australia">Australia</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">City</label>
+          <select class="form-select" id="city">
+            <option value="">Select City</option>
+          </select>
+        </div>
+
+        <div class="mb-3 text-center">
+          <label for="profilePic" class="form-label">Profile Picture</label><br>
+          <input type="file" class="form-control" id="profilePic" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function updateCities() {
+      var country = document.getElementById("country").value;
+      var city = document.getElementById("city");
+      city.innerHTML = "<option value=''>Select City</option>";
+
+      var citiesByCountry = {
+        pakistan: ["Karachi", "Lahore", "Islamabad", "Quetta", "Peshawar"],
+        india: ["Delhi", "Mumbai", "Chennai", "Kolkata", "Bangalore"],
+        usa: ["New York", "Los Angeles", "Chicago", "Houston", "San Francisco"],
+        uk: ["London", "Manchester", "Birmingham", "Liverpool"],
+        canada: ["Toronto", "Vancouver", "Montreal", "Calgary"],
+        australia: ["Sydney", "Melbourne", "Perth", "Brisbane"]
+      };
+
+      if (country && citiesByCountry[country]) {
+        citiesByCountry[country].forEach(function(c) {
+          var option = document.createElement("option");
+          option.value = c.toLowerCase();
+          option.text = c;
+          city.appendChild(option);
+        });
+      }
+    }
+  </script>
+</body>
+</html>

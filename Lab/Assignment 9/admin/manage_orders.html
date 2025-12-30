@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MediStore - Manage Orders</title>
+</head>
+<body>
+  <div id="masterMount"></div>
+
+  <script>
+    async function mountMasterAndContent() {
+      // Load master template
+      const res = await fetch('./master_template.html');
+      const html = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      document.documentElement.innerHTML = doc.documentElement.innerHTML;
+
+      // Page title
+      document.getElementById('sectionTitle').innerText = 'Manage Orders';
+
+      const container = document.getElementById('pageContent');
+      container.innerHTML = '<p class="lead">Loading orders...</p>';
+
+      try {
+        const resOrders = await fetch('../../Backend/admin/get_all_orders.php');
+        const data = await resOrders.json();
+
+        if (!data.success || !data.orders.length) {
+          container.innerHTML = '<div class="alert alert-warning">No orders found.</div>';
+          return;
+        }
+
+        container.innerHTML = '';
+        data.orders.forEach(order => {
+          // Build items table
+          let itemsHTML = `
+            <table class="table table-sm table-striped mt-2">
+              <thead class="table-light">
+                <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+              </thead>
+              <tbody>
+          `;
+          order.items.forEach(item => {
+            itemsHTML += `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.quantity}</td>
+                <td>Rs ${item.price}</td>
+                <td>Rs ${item.quantity * item.price}</td>
+              </tr>
+            `;
+          });
+          itemsHTML += `</tbody></table>`;
+
+          // Order card
+          container.innerHTML += `
+            <div class="custom-card mb-4 p-3 shadow-sm">
+              <h5 class="fw-bold text-primary">Order #${order.id}</h5>
+              <p>User: ${order.name} (${order.email})</p>
+              <p>Contact: ${order.contact || 'N/A'}</p>
+              <p>Address: ${order.address || 'N/A'}</p>
+              <p>Status: <span class="badge ${order.status === 'Delivered' ? 'bg-success' : 'bg-info'}">${order.status}</span></p>
+              <p><small>Placed on: ${order.created_at}</small></p>
+              ${itemsHTML}
+              <h6 class="text-end text-success">Grand Total: Rs ${order.total}</h6>
+              ${order.status !== 'Delivered' ? `
+                <button class="btn btn-sm btn-secondary" onclick="updateStatus(${order.id}, 'Delivered')">
+                  Mark Delivered
+                </button>` : ''}
+            </div>
+          `;
+        });
+      } catch (err) {
+        container.innerHTML = '<div class="alert alert-danger">❌ Failed to load orders.</div>';
+        console.error(err);
+      }
+    }
+
+    async function updateStatus(orderId, newStatus) {
+      try {
+        const res = await fetch('../../Backend/admin/update_order_status.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order_id: orderId, status: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("✅ Order status updated!");
+          // ✅ Reload orders to reflect new status
+          mountMasterAndContent();
+        } else {
+          alert("❌ Failed to update: " + data.message);
+        }
+      } catch (err) {
+        alert("❌ Network error: " + err);
+      }
+    }
+
+    mountMasterAndContent();
+  </script>
+</body>
+</html>
