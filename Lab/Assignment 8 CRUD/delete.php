@@ -5,4 +5,5 @@ $conn = mysqli_connect('localhost', 'root', '', 'wpl');
 $query = "delete from products where id = '$id' ";
 $result = mysqli_query($conn, $query);
 
-header('Location: '.'index.php');
+header('Location: index.php');
+exit;

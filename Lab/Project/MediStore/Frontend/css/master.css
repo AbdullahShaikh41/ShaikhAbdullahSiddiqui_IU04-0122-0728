@@ -1,0 +1,110 @@
+body {
+  background-color: #e8effc;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 220px;
+  background: #2c6ace;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 1000;
+}
+
+.main-content {
+  margin-left: 220px;
+}
+
+.sidebar .nav-link {
+  color: #cbd5e1;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  color: #fff;
+  background: #0f172a;
+  border-radius: 6px;
+}
+
+.page-title {
+  color: #0f172a;
+}
+
+.custom-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.btn-main {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+}
+
+.btn-main:hover {
+  background: #1d4ed8;
+}
+
+/* ✅ Shift main content so it doesn’t overlap fixed sidebar */
+.main-content {
+  margin-left: 220px;
+}
+/* 🔴 Red buttons (Logout etc) → Light Gray */
+.btn-danger {
+  background-color: #e5e7eb !important; /* light gray */
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.btn-danger:hover {
+  background-color: #d1d5db !important;
+  border-color: #9ca3af !important;
+  color: #111827 !important;
+}
+
+/* 🟢 Green buttons → Dark Gray */
+.btn-success {
+  background-color: #6b7280 !important; /* dark gray */
+  border-color: #6b7280 !important;
+  color: #ffffff !important;
+}
+
+.btn-success:hover {
+  background-color: #4b5563 !important;
+  border-color: #4b5563 !important;
+}
+/* 🔵 Primary buttons → Sidebar blue match */
+.btn-primary {
+  background-color: #2c6ace !important;
+  border-color: #2c6ace !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover {
+  background-color: #1f56b3 !important;
+  border-color: #1f56b3 !important;
+}
+/* 🧲 Sticky Action column in product table */
+/* 🧼 Clean table layout: no horizontal scroll */
+.table {
+  width: 100%;
+  table-layout: auto; /* allow flexible column widths */
+}
+
+.table th,
+.table td {
+  white-space: normal; /* allow wrapping */
+  word-break: break-word; /* break long text */
+}
+
+/* 📌 Add Product button floats right without scroll */
+.add-product-btn {
+  float: right;
+  margin-bottom: 10px;
+}

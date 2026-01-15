@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MediStore - Update Product</title>
+</head>
+<body>
+  <script>
+    const REGEX = {
+      name: /^[A-Za-z0-9 \-\&\(\)\.]{2,100}$/,
+      price: /^(?:\d+)(?:\.\d{1,2})?$/,
+      qty: /^\d{1,7}$/
+    };
+
+    function qs(name, def = null) {
+      const params = new URLSearchParams(location.search);
+      return params.get(name) ?? def;
+    }
+
+    async function fetchProductById(id) {
+      const res = await fetch('../../Backend/admin/list_products.php');
+      const data = await res.json();
+      if (!data.success) throw new Error('Failed to load products');
+      const product = data.data.find(p => String(p.id) === String(id));
+      if (!product) throw new Error('Product not found for given id');
+      return product;
+    }
+
+    function validateForm(fields) {
+      const errors = [];
+      if (!REGEX.name.test(fields.name)) errors.push('Invalid product name.');
+      if (!REGEX.price.test(String(fields.price))) errors.push('Invalid price format.');
+      if (!REGEX.qty.test(String(fields.qty))) errors.push('Invalid quantity.');
+      if (!fields.category) errors.push('Please select a category.');
+      if (!fields.description || fields.description.length < 3) errors.push('Description is too short.');
+      return errors;
+    }
+
+    async function updateProduct(id) {
+      const name = document.getElementById('pname').value.trim();
+      const price = parseFloat(document.getElementById('pprice').value.trim());
+      const qty = parseInt(document.getElementById('pqty').value.trim(), 10);
+      const category = document.getElementById('pcategory').value;
+      const description = document.getElementById('pdesc').value.trim();
+      const imageInput = document.getElementById('pimage');
+
+      const errors = validateForm({ name, price, qty, category, description });
+      if (errors.length) {
+        alert('Please fix:\n- ' + errors.join('\n- '));
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('id', id);
+      formData.append('name', name);
+      formData.append('price', price);
+      formData.append('qty', qty);
+      formData.append('category', category);
+      formData.append('description', description);
+      if (imageInput.files[0]) {
+        formData.append('image', imageInput.files[0]); // optional image update
+      }
+
+      try {
+        const res = await fetch('../../Backend/admin/update_product.php', { method: 'POST', body: formData });
+        const data = await res.json();
+        alert(data.msg || 'Request completed'); // ✅ use msg
+        if (data.success) {
+          window.location.href = './view_product.html';
+        }
+      } catch (e) {
+        console.error(e);
+        alert('❌ Network error');
+      }
+    }
+
+    async function mountMasterAndContent() {
+      // Load master
+      const res = await fetch('./master_template.html');
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      document.documentElement.innerHTML = doc.documentElement.innerHTML;
+
+      document.getElementById('sectionTitle').innerText = 'Update Product';
+
+      const content = `
+        <div id="updateProductSection">
+          <div class="custom-card p-4">
+            <input type="text" id="pname" class="form-control mb-3" placeholder="Product Name">
+            <input type="number" step="0.01" id="pprice" class="form-control mb-3" placeholder="Product Price">
+            <input type="number" id="pqty" class="form-control mb-3" placeholder="Quantity">
+            <select id="pcategory" class="form-control mb-3">
+              <option value="">Select Category</option>
+              <option value="Tablets">Tablets</option>
+              <option value="Suspensions">Suspensions</option>
+              <option value="Injections">Injections</option>
+              <option value="Others">Others</option>
+            </select>
+            <textarea id="pdesc" class="form-control mb-3" placeholder="Description"></textarea>
+            <input type="file" id="pimage" class="form-control mb-4" accept="image/*">
+
+            <a href="./view_product.html" class="btn btn-secondary">Cancel</a>
+            <button class="btn btn-main" id="updateProductBtn">Update Product</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('pageContent').innerHTML = content;
+
+      // Pre-fill form
+      try {
+        const id = qs('id', null); // ✅ use id from query string
+        const product = await fetchProductById(id);
+
+        document.getElementById('pname').value = product.name ?? '';
+        document.getElementById('pprice').value = product.price ?? '';
+        document.getElementById('pqty').value = product.qty ?? '';
+        document.getElementById('pcategory').value = product.category ?? '';
+        document.getElementById('pdesc').value = product.description ?? '';
+
+        document.getElementById('updateProductBtn').addEventListener('click', () => updateProduct(product.id));
+      } catch (e) {
+        alert('Could not load product for editing: ' + e.message);
+      }
+    }
+
+    mountMasterAndContent();
+  </script>
+</body>
+</html>
